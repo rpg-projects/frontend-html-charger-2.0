@@ -1,6 +1,6 @@
 body {
   /* background-color: #475766; */
-  background: linear-gradient(to right, #36516a, #547598);
+  background: linear-gradient(to right, #bebcbc, #7c7978);
 }
 
 a {
@@ -10,4 +10,12 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.bc {
+  background-color: gray !important; /* New color */
+}
+
+.login-button {
+  width: 100%;
 }

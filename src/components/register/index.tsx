@@ -12,7 +12,7 @@ import {
 import {
   Container,
   ErrorText,
-  InnerContainer,
+  LoginContainer,
   InputWrapper,
   StyledInput,
 } from "../commons";
@@ -71,7 +71,7 @@ function Register(props: any) {
 
   return (
     <Container>
-      <InnerContainer>
+      <LoginContainer>
         <form onSubmit={formik.handleSubmit}>
           <HeadingXXLarge>Register</HeadingXXLarge>
           <ErrorText>{error}</ErrorText>
@@ -104,7 +104,7 @@ function Register(props: any) {
             </Button>
           </InputWrapper>
         </form>
-      </InnerContainer>
+      </LoginContainer>
     </Container>
   );
 }

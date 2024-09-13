@@ -12,7 +12,7 @@ import {
 import {
   Container,
   ErrorText,
-  InnerContainer,
+  LoginContainer,
   InputWrapper,
   StyledInput,
 } from "../commons";
@@ -77,16 +77,16 @@ function Login(props: any) {
 
   return (
     <Container>
-      <InnerContainer>
+      <LoginContainer className="login-container">
         <form onSubmit={formik.handleSubmit}>
-          <HeadingXXLarge>LOGIN</HeadingXXLarge>
+          <HeadingXXLarge>HTML CHARGER</HeadingXXLarge>
           <ErrorText>{error}</ErrorText>
           <InputWrapper>
             <StyledInput
               name="email"
               value={formik.values.email}
               onChange={formik.handleChange}
-              placeholder="Email"
+              placeholder="tag do discord"
               clearOnEscape
               size="large"
               type="email"
@@ -97,20 +97,25 @@ function Login(props: any) {
               name="password"
               value={formik.values.password}
               onChange={formik.handleChange}
-              placeholder="Password"
+              placeholder="senha"
               clearOnEscape
               size="large"
               type="password"
             />
           </InputWrapper>
-          <a href="/sign-up">cadastrar novo usuário</a>
+          <a href="/sign-up">criar uma conta</a>
           <InputWrapper>
-            <Button size="large" kind="primary" isLoading={formik.isSubmitting}>
-              Login
+            <Button
+              className="login-button"
+              size="large"
+              kind="primary"
+              isLoading={formik.isSubmitting}
+            >
+              ENTRAR
             </Button>
           </InputWrapper>
         </form>
-      </InnerContainer>
+      </LoginContainer>
     </Container>
   );
 }

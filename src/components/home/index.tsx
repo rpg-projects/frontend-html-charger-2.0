@@ -6,9 +6,9 @@ import { useSignOut, useAuthUser } from "react-auth-kit";
 import {
   Container,
   ErrorText,
-  InnerContainer,
   InputWrapper,
   StyledInput,
+  LoginContainer,
 } from "../commons";
 import { useFormik } from "formik";
 import { useState } from "react";
@@ -55,7 +55,7 @@ function Home() {
     <Container>
       <HeadingXXLarge color="secondary500">Welcome {name}</HeadingXXLarge>
       <Container>
-        <InnerContainer>
+        <LoginContainer>
           <form onSubmit={formik.handleSubmit}>
             <HeadingMedium>Atualizar perfil</HeadingMedium>
             <ErrorText>{error}</ErrorText>
@@ -102,7 +102,7 @@ function Home() {
               </Button>
             </InputWrapper>
           </form>
-        </InnerContainer>
+        </LoginContainer>
       </Container>
       <Button kind="secondary" onClick={logout}>
         Logout

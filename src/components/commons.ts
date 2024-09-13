@@ -10,7 +10,7 @@ export const Container = styled.div`
   flex-direction: column;
 `;
 
-export const InnerContainer = styled.div`
+export const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,7 +18,7 @@ export const InnerContainer = styled.div`
   padding: 6rem 4rem;
   border-radius: 1rem;
   box-shadow: 0 2px 8px rgba(15, 15, 15, 0.6);
-  background-color: #1c1c1c;
+  background-color: rgba(0, 0, 0, 0.2); /* Black background with 50% opacity */
 `;
 
 export const InputWrapper = styled.div`

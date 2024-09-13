@@ -1,3 +1,8 @@
+body {
+  /* background-color: #475766; */
+  background: linear-gradient(to right, #36516a, #547598);
+}
+
 a {
   text-decoration: none;
   color: white;

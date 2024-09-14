@@ -34,11 +34,15 @@ function Login(props: any) {
   const onSubmit = async (values: any) => {
     setError("");
 
+    console.log("values :>> ", values);
+
     try {
       const response = await axios.post(
         "http://localhost:8080/auth/login",
         values
       );
+
+      console.log("response :>> ", response);
 
       //salva nos cookies e autentica
       signIn({
@@ -48,16 +52,10 @@ function Login(props: any) {
         authState: {
           id: response.data.id,
           email: values.email,
-          name: response.data.name,
         },
       });
 
       navigate("/");
-      // if (response.type == "user") {
-      //   navigate("/");
-      // } else if (response.type == "enterprise") {
-      //   navigate("/enterprises");
-      // }
     } catch (err) {
       if (err && err instanceof AxiosError)
         setError(err.response?.data.message);
@@ -86,7 +84,7 @@ function Login(props: any) {
               name="email"
               value={formik.values.email}
               onChange={formik.handleChange}
-              placeholder="tag do discord"
+              placeholder="email"
               clearOnEscape
               size="large"
               type="email"

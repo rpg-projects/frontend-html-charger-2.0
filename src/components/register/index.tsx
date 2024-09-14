@@ -16,13 +16,14 @@ import {
   InputWrapper,
   StyledInput,
 } from "../commons";
+import "./index.css";
 
 import { useSignIn } from "react-auth-kit";
 import { useFormik } from "formik";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import * as Yup from "yup";
+import * as Yup from "yup";
 
 function Register(props: any) {
   const [error, setError] = useState("");
@@ -34,10 +35,15 @@ function Register(props: any) {
     setError("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/auth/Register",
-        values
-      );
+      console.log("values :>> ", values);
+
+      if (!values.password || !values.passwordConfirm) {
+        throw new Error();
+      } else if (values.password !== values.passwordConfirm) {
+        throw new Error();
+      }
+
+      const response = await axios.post("http://localhost:8080/users", values);
 
       //salva nos cookies e autentica
       signIn({
@@ -47,7 +53,6 @@ function Register(props: any) {
         authState: {
           id: response.data.id,
           email: values.email,
-          name: response.data.name,
         },
       });
 
@@ -61,26 +66,36 @@ function Register(props: any) {
     }
   };
 
+  // const SignupSchema = Yup.object().shape({
+  //   email: Yup.string().email("Email inválido").required("Campo obrigatório"),
+  //   password: Yup.string().required("A senha é obrigatória"),
+  //   passwordConfirm: Yup.string().oneOf(
+  //     [Yup.ref("password"), null],
+  //     "Senhas diferentes"
+  //   ),
+  // });
+
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
+      passwordConfirm: "",
     },
     onSubmit,
   });
 
   return (
     <Container>
-      <LoginContainer>
+      <LoginContainer className="login-container">
         <form onSubmit={formik.handleSubmit}>
-          <HeadingXXLarge>Register</HeadingXXLarge>
+          <HeadingXXLarge>Registrar</HeadingXXLarge>
           <ErrorText>{error}</ErrorText>
           <InputWrapper>
             <StyledInput
               name="email"
               value={formik.values.email}
               onChange={formik.handleChange}
-              placeholder="Email"
+              placeholder="email"
               clearOnEscape
               size="large"
               type="email"
@@ -91,16 +106,31 @@ function Register(props: any) {
               name="password"
               value={formik.values.password}
               onChange={formik.handleChange}
-              placeholder="Password"
+              placeholder="senha"
               clearOnEscape
               size="large"
               type="password"
             />
           </InputWrapper>
-          <a href="/sign-up">cadastrar novo usuário</a>
           <InputWrapper>
-            <Button size="large" kind="primary" isLoading={formik.isSubmitting}>
-              Register
+            <StyledInput
+              name="passwordConfirm"
+              value={formik.values.passwordConfirm}
+              onChange={formik.handleChange}
+              placeholder="confirmar senha"
+              clearOnEscape
+              size="large"
+              type="password"
+            />
+          </InputWrapper>
+          <InputWrapper>
+            <Button
+              className="login-button"
+              size="large"
+              kind="primary"
+              isLoading={formik.isSubmitting}
+            >
+              ENTRAR
             </Button>
           </InputWrapper>
         </form>

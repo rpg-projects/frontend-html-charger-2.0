@@ -34,15 +34,16 @@ function Login(props: any) {
   const onSubmit = async (values: any) => {
     setError("");
 
-    console.log("values :>> ", values);
-
     try {
+      const loginBody = {
+        player_id: values.player_id,
+        password: values.password,
+      };
+
       const response = await axios.post(
         "http://localhost:8080/auth/login",
-        values
+        loginBody
       );
-
-      console.log("response :>> ", response);
 
       //salva nos cookies e autentica
       signIn({
@@ -51,7 +52,7 @@ function Login(props: any) {
         tokenType: "Bearer",
         authState: {
           id: response.data.id,
-          email: values.email,
+          player_id: values.player_id,
         },
       });
 
@@ -67,7 +68,7 @@ function Login(props: any) {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      player_id: "",
       password: "",
     },
     onSubmit,
@@ -81,13 +82,13 @@ function Login(props: any) {
           <ErrorText>{error}</ErrorText>
           <InputWrapper>
             <StyledInput
-              name="email"
-              value={formik.values.email}
+              name="player_id"
+              value={formik.values.player_id}
               onChange={formik.handleChange}
-              placeholder="email"
+              placeholder="player_id"
               clearOnEscape
               size="large"
-              type="email"
+              type="player_id"
             />
           </InputWrapper>
           <InputWrapper>

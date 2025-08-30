@@ -52,7 +52,7 @@ function Register(props: any) {
         tokenType: "Bearer",
         authState: {
           id: response.data.id,
-          email: values.email,
+          player_id: values.player_id,
         },
       });
 
@@ -67,7 +67,7 @@ function Register(props: any) {
   };
 
   // const SignupSchema = Yup.object().shape({
-  //   email: Yup.string().email("Email inválido").required("Campo obrigatório"),
+  //   player_id: Yup.string().player_id("player_id inválido").required("Campo obrigatório"),
   //   password: Yup.string().required("A senha é obrigatória"),
   //   passwordConfirm: Yup.string().oneOf(
   //     [Yup.ref("password"), null],
@@ -77,7 +77,7 @@ function Register(props: any) {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      player_id: "",
       password: "",
       passwordConfirm: "",
     },
@@ -92,13 +92,13 @@ function Register(props: any) {
           <ErrorText>{error}</ErrorText>
           <InputWrapper>
             <StyledInput
-              name="email"
-              value={formik.values.email}
+              name="player_id"
+              value={formik.values.player_id}
               onChange={formik.handleChange}
-              placeholder="email"
+              placeholder="Id de player"
               clearOnEscape
               size="large"
-              type="email"
+              type="player_id"
             />
           </InputWrapper>
           <InputWrapper>

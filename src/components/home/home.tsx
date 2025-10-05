@@ -4,10 +4,16 @@ import { useAuthUser, useSignOut } from "react-auth-kit";
 import { useNavigate } from "react-router-dom";
 import { Button } from "baseui/button";
 import { Popover, PLACEMENT } from "baseui/popover";
-import { HeadingXXLarge, HeadingMedium } from "baseui/typography";
+import {
+  HeadingXXLarge,
+  HeadingMedium,
+  HeadingSmall,
+  HeadingXSmall,
+} from "baseui/typography";
 import { Container, StyledInput, ErrorText } from "../commons";
 import styled from "styled-components";
 import { Pencil, Trash2 } from "lucide-react";
+import "./home.css";
 
 // === Styled Components ===
 const TopBar = styled.div`
@@ -28,11 +34,14 @@ const Select = styled.select`
 
 const TextArea = styled.textarea`
   width: 100%;
+  resize: both;
+  min-width: 200px; // largura mínima
+  max-width: 1000px; // largura máxima
   height: 200px;
   padding: 1rem;
   border-radius: 8px;
-  resize: vertical;
   font-size: 1rem;
+  box-sizing: border-box;
 `;
 
 const FormSection = styled.div`
@@ -52,6 +61,25 @@ const AddCharForm = styled.form`
   flex-direction: column;
   gap: 1rem;
 `;
+
+const AddCharButton = styled(Button)`
+  background-color: #695a48 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 0.8rem 1.2rem !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: #0056b3 !important;
+  }
+`;
+
+interface Char {
+  _id: string;
+  name: string;
+  html: string;
+  lines: string;
+}
 
 // === Funções auxiliares ===
 function getTextReady(text: string, color: string, charName: string) {
@@ -101,10 +129,11 @@ export function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [newChar, setNewChar] = useState({
+  const [newChar, setNewChar] = useState<Char>({
+    _id: "",
     name: "",
     html: "",
-    htmlSpeech: "",
+    lines: "",
   });
 
   // === Carrega personagens ===
@@ -114,7 +143,7 @@ export function Home() {
         const res = await axios.get("http://localhost:8080/chars", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("res :>> ", res.data);
+        console.log("res.data :>> ", res.data);
         setChars(res.data);
       } catch (err) {
         console.error(err);
@@ -167,16 +196,16 @@ export function Home() {
   const handleAddChar = (e: React.FormEvent) => {
     e.preventDefault();
 
-    axios
-      .post("/chars", newChar, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setChars([...chars, res.data]);
-        setShowAddForm(false);
-        setNewChar({ name: "", html: "", htmlSpeech: "" });
-      })
-      .catch(() => alert("Erro ao adicionar personagem"));
+    // axios
+    //   .post("/chars", newChar, {
+    //     headers: { Authorization: `Bearer ${token}` },
+    //   })
+    //   .then((res) => {
+    //     setChars([...chars, res.data]);
+    //     setShowAddForm(false);
+    //     setNewChar({ name: "", html: "", htmlSpeech: "" });
+    //   })
+    //   .catch(() => alert("Erro ao adicionar personagem"));
   };
 
   // === Edita personagem ===
@@ -219,97 +248,131 @@ export function Home() {
   };
 
   return (
-    <Container>
+    <div className="home-container">
       <TopBar>
         <Button kind="secondary" onClick={logout}>
           Sair
         </Button>
       </TopBar>
 
-      <HeadingXXLarge color="secondary500">{name} CHARS</HeadingXXLarge>
+      <HeadingXXLarge color="secondary500">HTML CHARGER</HeadingXXLarge>
+      {/* <HeadingXXLarge color="secondary500">{name} CHARS</HeadingXXLarge> */}
 
       <FormSection>
-        <HeadingMedium>Gerador de HTML</HeadingMedium>
+        {/* <HeadingMedium>Gerador de HTML</HeadingMedium> */}
 
-        {/* char selection */}
-        <div style={{ width: "300px", position: "relative" }} ref={dropdownRef}>
-          <Button onClick={() => setIsOpen(!isOpen)}>
-            {selectedChar
-              ? chars.find((c) => c.id === selectedChar)?.name
-              : "Selecione um personagem"}
-          </Button>
+        <div className="char-edits">
+          <div className="select-with-title">
+            <h3 className="title">{name} CHARS:</h3>
+            {/* char selection */}
+            <div className="char-select" ref={dropdownRef}>
+              <input
+                readOnly
+                value={
+                  selectedChar
+                    ? chars.find((c) => c._id === selectedChar)?.name
+                    : ""
+                }
+                placeholder="Selecione um char"
+                onClick={(e) => {
+                  e.stopPropagation(); // impede o document de fechar
+                  setIsOpen((prev) => !prev); // alterna entre abrir/fechar
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem 0.6rem",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  cursor: "pointer",
+                }}
+              />
 
-          {isOpen && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                maxHeight: "200px",
-                overflowY: "auto",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                background: "#fff",
-                marginTop: "0.2rem",
-                zIndex: 10,
-              }}
-            >
-              {chars.length === 0 ? (
+              {isOpen && (
                 <div
                   style={{
-                    padding: "0.5rem",
-                    textAlign: "center",
-                    color: "#666",
+                    position: "absolute",
+                    top: "100%",
+                    width: "9.2rem",
+                    left: 0,
+                    right: 0,
+                    overflowY: "hidden",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    background: "#fff",
+                    marginTop: "0.2rem",
+                    zIndex: 10,
+                    boxSizing: "border-box",
                   }}
                 >
-                  Nenhum personagem ainda, adicione o primeiro!
-                </div>
-              ) : (
-                chars.map((char) => (
-                  <div
-                    key={char.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "0.5rem",
-                      background:
-                        selectedChar === char.id
-                          ? "rgba(0,0,0,0.05)"
-                          : "transparent",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => setSelectedChar(char.id)}
-                  >
-                    <span>{char.name}</span>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Pencil
-                        size={16}
-                        color="#007bff"
-                        style={{ cursor: "pointer" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingChar(char);
-                          setShowEditForm(true);
+                  {chars.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "0.5rem",
+                        textAlign: "center",
+                        color: "#666",
+                      }}
+                    >
+                      Nenhum personagem ainda, adicione o primeiro!
+                    </div>
+                  ) : (
+                    chars.map((char) => (
+                      <div
+                        key={char._id}
+                        style={{
+                          display: "flex",
+                          width: "90%",
+                          overflow: "hidden",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "0.5rem 0.3rem",
+                          background:
+                            selectedChar === char._id
+                              ? "rgba(0,0,0,0.05)"
+                              : "transparent",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setSelectedChar(char._id);
                           setIsOpen(false);
                         }}
-                      />
-                      <Trash2
-                        size={16}
-                        color="#ff4d4d"
-                        style={{ cursor: "pointer" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteChar(char.id);
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))
+                      >
+                        <span>{char.name}</span>
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <Pencil
+                            size={16}
+                            color="#007bff"
+                            style={{ cursor: "pointer" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingChar(char);
+                              setShowEditForm(true);
+                              setIsOpen(false);
+                            }}
+                          />
+                          <Trash2
+                            size={16}
+                            color="#ff4d4d"
+                            style={{ cursor: "pointer" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteChar(char._id);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
+
+          <AddCharButton
+            kind="secondary"
+            onClick={() => setShowAddForm((prev) => !prev)}
+          >
+            {showAddForm ? "Fechar" : "Adicionar novo personagem"}
+          </AddCharButton>
         </div>
 
         <TextArea
@@ -319,13 +382,6 @@ export function Home() {
         />
 
         <Button onClick={handleGenerateHTML}>Pegar HTML do Post</Button>
-
-        <Button
-          kind="secondary"
-          onClick={() => setShowAddForm((prev) => !prev)}
-        >
-          {showAddForm ? "Fechar" : "Adicionar novo personagem"}
-        </Button>
 
         {showAddForm && (
           <AddCharForm onSubmit={handleAddChar}>
@@ -345,9 +401,9 @@ export function Home() {
             />
             <TextArea
               placeholder="HTML de fala (para falas específicas)"
-              value={newChar.htmlSpeech}
+              value={newChar.lines}
               onChange={(e) =>
-                setNewChar({ ...newChar, htmlSpeech: e.target.value })
+                setNewChar({ ...newChar, lines: e.target.value })
               }
               required
             />
@@ -390,6 +446,6 @@ export function Home() {
 
         {error && <ErrorText>{error}</ErrorText>}
       </FormSection>
-    </Container>
+    </div>
   );
 }

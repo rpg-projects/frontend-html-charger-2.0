@@ -16,7 +16,7 @@ import {
   InputWrapper,
   StyledInput,
 } from "../commons";
-import "./index.css";
+import "./register.css";
 
 import { useSignIn } from "react-auth-kit";
 import { useFormik } from "formik";
@@ -24,6 +24,7 @@ import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { FloatingAuthImage } from "../FloatingAuthImage";
 
 function Register(props: any) {
   const [error, setError] = useState("");
@@ -85,8 +86,8 @@ function Register(props: any) {
   });
 
   return (
-    <Container>
-      <LoginContainer className="login-container">
+    <Container className="register-body">
+      <LoginContainer>
         <form onSubmit={formik.handleSubmit}>
           <HeadingXXLarge>Registrar</HeadingXXLarge>
           <ErrorText>{error}</ErrorText>
@@ -124,17 +125,14 @@ function Register(props: any) {
             />
           </InputWrapper>
           <InputWrapper>
-            <Button
-              className="login-button"
-              size="large"
-              kind="primary"
-              isLoading={formik.isSubmitting}
-            >
+            <Button size="large" kind="primary" isLoading={formik.isSubmitting}>
               ENTRAR
             </Button>
           </InputWrapper>
         </form>
       </LoginContainer>
+
+      <FloatingAuthImage />
     </Container>
   );
 }

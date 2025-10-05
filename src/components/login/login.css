@@ -1,29 +1,28 @@
-body {
-  /* background-color: #475766; */
-  background: linear-gradient(to right, #bebcbc, #7c7978);
+.login-body {
+  background: linear-gradient(to right, #ebcead, #695a48);
 }
 
-a {
+.login-body a {
   text-decoration: none;
   color: white;
 }
 
-a:hover {
+.login-body a:hover {
   text-decoration: underline;
 }
 
-.bc {
+.login-body .bc {
   background-color: gray !important; /* New color */
 }
 
-.login-button {
+/* .login-body .login-button {
   width: 100%;
-}
+} */
 
-.cu {
+.login-body .cu {
   background-color: #9a9696 !important;
 }
 
-.ct {
+.login-body .ct {
   color: white !important;
 }

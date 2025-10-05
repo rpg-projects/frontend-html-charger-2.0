@@ -1,14 +1,6 @@
+import "./login.css";
 import { Button } from "baseui/button";
 import { Input } from "baseui/input";
-import styled from "styled-components";
-import {
-  HeadingXXLarge,
-  HeadingXLarge,
-  HeadingLarge,
-  HeadingMedium,
-  HeadingSmall,
-  HeadingXSmall,
-} from "baseui/typography";
 import {
   Container,
   ErrorText,
@@ -16,23 +8,25 @@ import {
   InputWrapper,
   StyledInput,
 } from "../commons";
-import "./login.css";
+import { HeadingXXLarge } from "baseui/typography";
 
 import { useSignIn } from "react-auth-kit";
 import { useFormik } from "formik";
 import axios, { AxiosError } from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import * as Yup from "yup";
+import image from "../../assets/login-and-register.png";
+import { FloatingAuthImage } from "../FloatingAuthImage";
 
-function Login(props: any) {
-  const [error, setError] = useState("");
+function Login() {
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
   const signIn = useSignIn();
-
   const navigate = useNavigate();
 
   const onSubmit = async (values: any) => {
     setError("");
+    setLoading(true);
 
     try {
       const loginBody = {
@@ -45,24 +39,44 @@ function Login(props: any) {
         loginBody
       );
 
-      //salva nos cookies e autentica
+      console.log("response :>> ", response);
+
+      // autentica e salva nos cookies
       signIn({
         token: response.data.token,
-        expiresIn: 3600,
+        expiresIn: 60 * 60 * 24 * 365 * 10,
         tokenType: "Bearer",
         authState: {
-          id: response.data.id,
           player_id: values.player_id,
+          token: response.data.token,
         },
       });
 
       navigate("/");
     } catch (err) {
-      if (err && err instanceof AxiosError)
-        setError(err.response?.data.message);
-      else if (err && err instanceof Error) setError(err.message);
+      console.error("Erro no login:", err);
 
-      console.log("Error: ", err);
+      if (err instanceof AxiosError) {
+        if (err.response) {
+          const status = err.response.status;
+
+          if (status === 400) {
+            setError("Usuário ou senha incorretos.");
+          } else if (!err.response.data) {
+            setError("Erro no servidor. Tente novamente mais tarde.");
+          } else {
+            setError("Erro ao fazer login.");
+          }
+        } else {
+          setError("Não foi possível conectar ao servidor.");
+        }
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Ocorreu um erro inesperado. Tente novamente.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,11 +89,14 @@ function Login(props: any) {
   });
 
   return (
-    <Container>
-      <LoginContainer className="login-container">
-        <form onSubmit={formik.handleSubmit}>
+    <Container className="login-body">
+      <LoginContainer>
+        <form className="form" onSubmit={formik.handleSubmit}>
           <HeadingXXLarge>HTML CHARGER</HeadingXXLarge>
-          <ErrorText>{error}</ErrorText>
+
+          {/* Exibe mensagem de erro */}
+          {error && <ErrorText>{error}</ErrorText>}
+
           <InputWrapper>
             <StyledInput
               name="player_id"
@@ -88,9 +105,10 @@ function Login(props: any) {
               placeholder="player_id"
               clearOnEscape
               size="large"
-              type="player_id"
+              type="text"
             />
           </InputWrapper>
+
           <InputWrapper>
             <StyledInput
               name="password"
@@ -102,19 +120,22 @@ function Login(props: any) {
               type="password"
             />
           </InputWrapper>
+
           <a href="/sign-up">criar uma conta</a>
+
           <InputWrapper>
             <Button
-              className="login-button"
               size="large"
               kind="primary"
-              isLoading={formik.isSubmitting}
+              isLoading={loading}
+              type="submit"
             >
               ENTRAR
             </Button>
           </InputWrapper>
         </form>
       </LoginContainer>
+      <FloatingAuthImage />
     </Container>
   );
 }

@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #d5dbe7;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,4 +35,28 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ROOT do componente (borda e fundo) */
+[data-baseweb="input"] {
+  background-color: #d9d9d9 !important;
+  border: 3px solid #908378 !important; /* cobre top/right/bottom/left */
+  border-radius: 8px; /* se quiser */
+}
+
+/* CONTAINER interno do input */
+[data-baseweb="base-input"] {
+  background-color: #d9d9d9 !important;
+}
+
+/* O <input> real */
+[data-baseweb="base-input"] input {
+  background-color: #d9d9d9 !important;
+  caret-color: #908378 !important;
+  font-family: "Inter", sans-serif !important;
+  color: black;
+}
+
+[data-baseweb="base-input"] input::placeholder {
+  color: #908378 !important;
 }

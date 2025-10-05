@@ -29,3 +29,34 @@
   width: 8rem;
   position: relative;
 }
+
+@media (max-width: 460px) {
+  .home-container {
+    padding-top: 0rem;
+  }
+
+  .home-container .title {
+    font-size: 2.2rem;
+    padding-top: 2rem;
+    margin-bottom: 0;
+  }
+
+  .home-container .char-edits {
+    flex-direction: column;
+    margin-top: 0;
+
+    padding: 1rem 2rem;
+  }
+
+  .char-edits .select-with-title {
+    justify-content: space-around;
+    margin-bottom: 0.6rem;
+  }
+
+  .char-edits .title {
+    margin: 0;
+    margin-right: 0.5rem;
+    padding: 0;
+    font-size: 1.5rem;
+  }
+}

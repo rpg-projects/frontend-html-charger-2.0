@@ -12,7 +12,7 @@ import {
 } from "baseui/typography";
 import { Container, StyledInput, ErrorText } from "../commons";
 import styled from "styled-components";
-import { Pencil, Trash2 } from "lucide-react";
+import { LogOut, Pencil, Trash2 } from "lucide-react";
 import "./home.css";
 
 // === Styled Components ===
@@ -22,6 +22,11 @@ const TopBar = styled.div`
   right: 2rem;
   display: flex;
   gap: 1rem;
+
+  @media (max-width: 460px) {
+    top: 1rem;
+    right: 1rem;
+  }
 `;
 
 const Select = styled.select`
@@ -42,6 +47,12 @@ const TextArea = styled.textarea`
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
+
+  @media (max-width: 460px) {
+    width: 90%;
+    height: 400px;
+    margin: auto;
+  }
 `;
 
 const FormSection = styled.div`
@@ -51,6 +62,10 @@ const FormSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: 460px) {
+    margin: 0.5rem auto;
+  }
 `;
 
 const AddCharForm = styled.form`
@@ -70,7 +85,34 @@ const AddCharButton = styled(Button)`
   font-weight: 600 !important;
 
   &:hover {
-    background-color: #0056b3 !important;
+    background-color: #534839ff !important;
+  }
+`;
+
+const LogoutButton = styled(Button)`
+  background-color: #352d23ff !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 0.8rem 1.2rem !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: #2b241cff !important;
+  }
+
+  @media (max-width: 460px) {
+    padding: 0.6rem 0.6rem !important;
+    font-size: 1rem;
+    position: absolute;
+    top: 0.1rem; /* distância do topo */
+    right: 0rem; /* distância da direita */
+  }
+`;
+
+const GetHTMLButton = styled(Button)`
+  @media (max-width: 460px) {
+    width: 90%;
+    margin: auto;
   }
 `;
 
@@ -117,6 +159,8 @@ export function Home() {
 
   const name = auth()?.player_id;
 
+  const [isMobile, setIsMobile] = useState(false);
+
   const [chars, setChars] = useState<any[]>([]);
   const [selectedChar, setSelectedChar] = useState("");
   const [text, setText] = useState("");
@@ -157,6 +201,10 @@ export function Home() {
   }, [token]);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize(); // verifica ao montar
+    window.addEventListener("resize", handleResize);
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -169,6 +217,7 @@ export function Home() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -250,12 +299,14 @@ export function Home() {
   return (
     <div className="home-container">
       <TopBar>
-        <Button kind="secondary" onClick={logout}>
-          Sair
-        </Button>
+        <LogoutButton kind="secondary" onClick={logout}>
+          {isMobile ? <LogOut size={20} /> : "Sair"}
+        </LogoutButton>
       </TopBar>
 
-      <HeadingXXLarge color="secondary500">HTML CHARGER</HeadingXXLarge>
+      <HeadingXXLarge className="title" color="secondary500">
+        HTML CHARGER
+      </HeadingXXLarge>
       {/* <HeadingXXLarge color="secondary500">{name} CHARS</HeadingXXLarge> */}
 
       <FormSection>
@@ -381,7 +432,9 @@ export function Home() {
           onChange={(e) => setText(e.target.value)}
         />
 
-        <Button onClick={handleGenerateHTML}>Pegar HTML do Post</Button>
+        <GetHTMLButton onClick={handleGenerateHTML}>
+          Pegar HTML do Post
+        </GetHTMLButton>
 
         {showAddForm && (
           <AddCharForm onSubmit={handleAddChar}>

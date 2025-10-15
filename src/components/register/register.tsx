@@ -44,7 +44,10 @@ function Register(props: any) {
         throw new Error();
       }
 
-      const response = await axios.post("http://localhost:8080/users", values);
+      const response = await axios.post(
+        "https://backend-html-charger.onrender.com/users",
+        values
+      );
 
       //salva nos cookies e autentica
       signIn({

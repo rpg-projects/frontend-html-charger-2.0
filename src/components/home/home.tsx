@@ -10,10 +10,19 @@ import {
   HeadingSmall,
   HeadingXSmall,
 } from "baseui/typography";
+import {
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalButton,
+} from "baseui/modal";
+import { StatefulTooltip } from "baseui/tooltip";
 import { Container, StyledInput, ErrorText } from "../commons";
 import styled from "styled-components";
 import { LogOut, Pencil, Trash2 } from "lucide-react";
 import "./home.css";
+import toast from "react-hot-toast";
 
 // === Styled Components ===
 const TopBar = styled.div`
@@ -53,6 +62,18 @@ const TextArea = styled.textarea`
     height: 400px;
     margin: auto;
   }
+`;
+
+const TextAreaForm = styled.textarea`
+  width: 100%;
+  resize: both;
+  min-width: 200px; // largura mínima
+  max-width: 1000px; // largura máxima
+  height: 400px;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
 `;
 
 const FormSection = styled.div`
@@ -123,23 +144,24 @@ interface Char {
   lines: string;
 }
 
+interface CreateChar {
+  name: string;
+  html: string;
+  lines: string;
+}
+
 // === Funções auxiliares ===
-function getTextReady(text: string, color: string, charName: string) {
+function getTextReady(text: string, lines: string) {
+  const [part1, part2] = lines.split("FALA");
   let isLineStart = true;
   const newText: string[] = [];
 
   for (let i = 0; i < text.length; i++) {
-    if (
-      (text[i] === "~" || text[i] === "—" || text[i] === "-") &&
-      isLineStart
-    ) {
-      newText.push(`<b style="color: ${color}">`);
+    if ((text[i] === "~" || text[i] === "—") && isLineStart) {
+      newText.push(part1);
       isLineStart = false;
-    } else if (
-      (text[i] === "~" || text[i] === "—" || text[i] === "-") &&
-      !isLineStart
-    ) {
-      newText.push("</b>");
+    } else if ((text[i] === "~" || text[i] === "—") && !isLineStart) {
+      newText.push(part2);
       isLineStart = true;
     } else {
       newText.push(text[i]);
@@ -163,18 +185,26 @@ export function Home() {
 
   const [chars, setChars] = useState<any[]>([]);
   const [selectedChar, setSelectedChar] = useState("");
-  const [text, setText] = useState("");
+  const [text, setText] = useState(() => {
+    return localStorage.getItem("draftText") || "";
+  });
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    name?: string;
+    html?: string;
+    lines?: string;
+  }>({});
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingChar, setEditingChar] = useState<any | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
 
+  const [modalChar, setModalChar] = useState<CreateChar | Char | null>(null);
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [newChar, setNewChar] = useState<Char>({
-    _id: "",
+  const [newChar, setNewChar] = useState<CreateChar>({
     name: "",
     html: "",
     lines: "",
@@ -184,9 +214,12 @@ export function Home() {
   useEffect(() => {
     const fetchChars = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/chars", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          "https://backend-html-charger.onrender.com/chars",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         console.log("res.data :>> ", res.data);
         setChars(res.data);
       } catch (err) {
@@ -221,6 +254,10 @@ export function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("draftText", text);
+  }, [text]);
+
   const logout = () => {
     signOut();
     navigate("/login");
@@ -228,54 +265,81 @@ export function Home() {
 
   // === Gera HTML ===
   const handleGenerateHTML = () => {
-    const char = chars.find((c) => c.id === selectedChar);
+    const char = chars.find((c) => c._id === selectedChar);
+    console.log("char :>> ", char);
+
     if (!char) return alert("Selecione um personagem válido.");
 
-    const { html, color } = char;
+    const { html, lines } = char;
     const [part1, part2] = html.split("TEXTO");
 
-    const formattedText = getTextReady(text, color, char.name);
+    const formattedText = getTextReady(text, lines);
     const finalHtml = `${part1}${formattedText}${part2}`;
 
     navigator.clipboard.writeText(finalHtml);
     alert("HTML copiado para a área de transferência!");
+
+    localStorage.removeItem("draftText");
+    setText("");
   };
 
-  // === Adiciona novo personagem ===
-  const handleAddChar = (e: React.FormEvent) => {
-    e.preventDefault();
+  function validateNewCharFormat(char: CreateChar) {
+    const newErrors: { name?: string; html?: string; lines?: string } = {};
 
-    // axios
-    //   .post("/chars", newChar, {
-    //     headers: { Authorization: `Bearer ${token}` },
-    //   })
-    //   .then((res) => {
-    //     setChars([...chars, res.data]);
-    //     setShowAddForm(false);
-    //     setNewChar({ name: "", html: "", htmlSpeech: "" });
-    //   })
-    //   .catch(() => alert("Erro ao adicionar personagem"));
-  };
+    if (!char.name.trim()) {
+      newErrors.name = "O nome é obrigatório.";
+    }
 
-  // === Edita personagem ===
-  const handleEditChar = async (e: React.FormEvent) => {
+    if (!/<[^>]*>.*TEXTO.*<\/[^>]*>/.test(char.html)) {
+      newErrors.html = "Formato incorreto — use algo como <html>TEXTO</html>";
+    }
+
+    if (!/<[^>]*>.*FALA.*<\/[^>]*>/.test(char.lines)) {
+      newErrors.lines = "Formato incorreto — use algo como <html>FALA</html>";
+    }
+
+    return newErrors;
+  }
+
+  const handleSaveChar = async (e: React.FormEvent, char: any) => {
     e.preventDefault();
-    if (!editingChar) return;
+    const validationErrors = validateNewCharFormat(char);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
 
     try {
-      const res = await axios.put(
-        `http://localhost:8080/chars/${editingChar.id}`,
-        editingChar,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setChars((prev) =>
-        prev.map((c) => (c.id === editingChar.id ? res.data : c))
-      );
-      setShowEditForm(false);
-      setEditingChar(null);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao editar personagem");
+      if ("_id" in char) {
+        // Editar
+        const res = await axios.put(
+          `https://backend-html-charger.onrender.com/chars/${char._id}`,
+          char,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setChars((prev) =>
+          prev.map((c) => (c._id === char._id ? res.data : c))
+        );
+        toast.success("Personagem editado!");
+      } else {
+        // Adicionar
+        const res = await axios.post(
+          "https://backend-html-charger.onrender.com/chars",
+          char,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setChars((prev) => [...prev, res.data]);
+        toast.success("Personagem adicionado!");
+      }
+      setModalChar(null);
+    } catch (error) {
+      toast.error("Erro ao salvar personagem");
     }
   };
 
@@ -285,10 +349,13 @@ export function Home() {
       return;
 
     try {
-      await axios.delete(`http://localhost:8080/chars/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setChars((prev) => prev.filter((c) => c.id !== id));
+      await axios.delete(
+        `https://backend-html-charger.onrender.com/chars/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setChars((prev) => prev.filter((c) => c._id !== id));
       setSelectedChar("");
     } catch (err) {
       console.error(err);
@@ -395,8 +462,8 @@ export function Home() {
                             style={{ cursor: "pointer" }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setEditingChar(char);
-                              setShowEditForm(true);
+                              console.log("char :>> ", char);
+                              setModalChar(char);
                               setIsOpen(false);
                             }}
                           />
@@ -420,7 +487,7 @@ export function Home() {
 
           <AddCharButton
             kind="secondary"
-            onClick={() => setShowAddForm((prev) => !prev)}
+            onClick={() => setModalChar({ name: "", html: "", lines: "" })}
           >
             {showAddForm ? "Fechar" : "Adicionar novo personagem"}
           </AddCharButton>
@@ -436,66 +503,84 @@ export function Home() {
           Pegar HTML do Post
         </GetHTMLButton>
 
-        {showAddForm && (
-          <AddCharForm onSubmit={handleAddChar}>
-            <StyledInput
-              placeholder="Nome do personagem"
-              value={newChar.name}
-              onChange={(e: any) =>
-                setNewChar({ ...newChar, name: e.target.value })
-              }
-              required
-            />
-            <TextArea
-              placeholder="HTML do personagem (inclua 'TEXTO' onde o texto será inserido)"
-              value={newChar.html}
-              onChange={(e) => setNewChar({ ...newChar, html: e.target.value })}
-              required
-            />
-            <TextArea
-              placeholder="HTML de fala (para falas específicas)"
-              value={newChar.lines}
-              onChange={(e) =>
-                setNewChar({ ...newChar, lines: e.target.value })
-              }
-              required
-            />
-            <Button type="submit">Salvar Personagem</Button>
-          </AddCharForm>
-        )}
+        <Modal onClose={() => setModalChar(null)} isOpen={!!modalChar}>
+          <ModalHeader>
+            {"id" in (modalChar || {})
+              ? "Editar Personagem"
+              : "Adicionar Novo Personagem"}
+          </ModalHeader>
 
-        {showEditForm && editingChar && (
-          <AddCharForm onSubmit={handleEditChar}>
-            <StyledInput
-              placeholder="Nome do personagem"
-              value={editingChar.name}
-              onChange={(e: any) =>
-                setEditingChar({ ...editingChar, name: e.target.value })
-              }
-              required
-            />
-            <TextArea
-              placeholder="HTML do personagem"
-              value={editingChar.html}
-              onChange={(e) =>
-                setEditingChar({ ...editingChar, html: e.target.value })
-              }
-              required
-            />
-            <TextArea
-              placeholder="HTML de fala"
-              value={editingChar.htmlSpeech}
-              onChange={(e) =>
-                setEditingChar({ ...editingChar, htmlSpeech: e.target.value })
-              }
-              required
-            />
-            <Button type="submit">Salvar Alterações</Button>
-            <Button kind="secondary" onClick={() => setShowEditForm(false)}>
+          <ModalBody>
+            {modalChar && (
+              <AddCharForm
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveChar(e, modalChar);
+                }}
+              >
+                {/* Nome */}
+                <StyledInput
+                  placeholder="Nome do char"
+                  value={modalChar.name}
+                  onChange={(e: any) =>
+                    setModalChar({ ...modalChar, name: e.target.value } as any)
+                  }
+                  required
+                />
+                {errors.name && <ErrorText>{errors.name}</ErrorText>}
+
+                {/* HTML do personagem */}
+                <div style={{ position: "relative" }}>
+                  <TextAreaForm
+                    placeholder="HTML do personagem — destaque aonde ficará o texto: <html>TEXTO</html>"
+                    value={modalChar.html}
+                    onChange={(e) =>
+                      setModalChar({
+                        ...modalChar,
+                        html: e.target.value,
+                      } as any)
+                    }
+                    required
+                  />
+                  {errors.html && <ErrorText>{errors.html}</ErrorText>}
+                </div>
+
+                {/* HTML de fala */}
+                <div
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <TextAreaForm
+                    placeholder="HTML de fala — destaque aonde ficará a fala: <html>FALA</html>"
+                    style={{ height: "100px" }}
+                    value={modalChar.lines}
+                    onChange={(e) =>
+                      setModalChar({
+                        ...modalChar,
+                        lines: e.target.value,
+                      } as any)
+                    }
+                    required
+                  />
+                  {errors.lines && <ErrorText>{errors.lines}</ErrorText>}
+                </div>
+              </AddCharForm>
+            )}
+          </ModalBody>
+
+          <ModalFooter>
+            <ModalButton
+              type="submit"
+              onClick={(e) => handleSaveChar(e, modalChar!)}
+            >
+              Salvar
+            </ModalButton>
+            <ModalButton kind="tertiary" onClick={() => setModalChar(null)}>
               Cancelar
-            </Button>
-          </AddCharForm>
-        )}
+            </ModalButton>
+          </ModalFooter>
+        </Modal>
 
         {error && <ErrorText>{error}</ErrorText>}
       </FormSection>

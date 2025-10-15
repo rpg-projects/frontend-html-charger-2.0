@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  background: linear-gradient(to bottom, #ebcead 10%, #695a48);
+  background: linear-gradient(to bottom, #ebcead 5%, #695a48);
   padding-top: 2rem;
   position: relative;
 }

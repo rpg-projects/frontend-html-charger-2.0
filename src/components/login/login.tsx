@@ -35,11 +35,9 @@ function Login() {
       };
 
       const response = await axios.post(
-        "http://localhost:8080/auth/login",
+        "https://backend-html-charger.onrender.com/auth/login",
         loginBody
       );
-
-      console.log("response :>> ", response);
 
       // autentica e salva nos cookies
       signIn({

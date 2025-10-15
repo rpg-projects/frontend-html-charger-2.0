@@ -13,12 +13,32 @@ export const Container = styled.div`
 export const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 6rem 4rem;
+  align-items: center;
+  padding: 4rem 4rem 8rem 4rem;
+  margin-bottom: 160px;
   border-radius: 1rem;
   box-shadow: 0 2px 8px rgba(15, 15, 15, 0.6);
-  background-color: rgba(0, 0, 0, 0.2); /* Black background with 50% opacity */
+  background-color: rgba(0, 0, 0, 0.4); /* Black background with 50% opacity */
+
+  @media (max-width: 1024px) {
+    padding: 2rem 2rem 4rem 2rem;
+    margin-right: 100px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 2rem 4rem 2rem;
+    margin-right: 100px;
+    margin-bottom: 160px;
+  }
+
+  @media (max-width: 460px) {
+    padding: 1rem 1rem 2rem 1rem;
+    margin-right: 0px;
+    margin-bottom: 260px;
+    justify-content: center;
+    align-items: center;
+  }
 `;
 
 export const InputWrapper = styled.div`
